@@ -31,4 +31,14 @@ management:
   endpoint:
     health:
       show-details: always
-  
+lab: 
+  gift: 
+    # options: db-only, cache-preload
+    send-mode: cache-preload
+    cache: 
+      gift: 
+        maximum-size: 10000
+        expire-after-write-seconds: 300
+      room: 
+        maximum-size: 10000
+        expire-after-write-seconds: 60

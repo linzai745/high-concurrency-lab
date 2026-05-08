@@ -6,5 +6,7 @@ public interface GiftGateway {
     
     Gift getById(Long giftId);
     
+    Gift getByIdWithCache(Long giftId);
+    
     boolean deductStock(Long giftId, Integer count);
 }
