@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/lab-deploy/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-deploy/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-docs/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-docs/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-adapter/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-adapter/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-app/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-app/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-domain/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-domain/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-infrastructure/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-infrastructure/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-start/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/lab-gift-start/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lab-gift/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
