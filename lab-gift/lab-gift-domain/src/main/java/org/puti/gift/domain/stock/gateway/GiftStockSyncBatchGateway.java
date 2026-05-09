@@ -2,6 +2,7 @@ package org.puti.gift.domain.stock.gateway;
 
 import org.puti.gift.domain.stock.model.entity.GiftStockSyncBatch;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GiftStockSyncBatchGateway {
@@ -16,4 +17,6 @@ public interface GiftStockSyncBatchGateway {
     boolean markFailed(String batchNo, String errorMessage);
 
     List<GiftStockSyncBatch> findNeedRecover(int limit);
+
+    List<GiftStockSyncBatch> queryTimeoutCreatedBatches(LocalDateTime beforeTime, int batchSize);
 }

@@ -27,7 +27,7 @@ public interface GiftStockReservationGateway {
 
     Integer sumReserveCountByBatchNo(String batchNo);
 
-    Integer countByBatchNo(String batchNo);
+    Integer countSyncingByBatchNo(String batchNo);
 
     boolean markSyncedByBatchNo(String batchNo);
 
@@ -36,4 +36,10 @@ public interface GiftStockReservationGateway {
     Long sumPendingSyncCount(Long giftId);
 
     Long sumReservedNotConfirmedCount(Long giftId);
+    
+    List<String> queryTimeoutSyncingBatchNos(LocalDateTime beforeTime, int batchSize);
+
+    int resetSyncingToPendingByBatchNo(String batchNo);
+
+    int recoverSyncedByFinishedBatchNo(String batchNo);
 }

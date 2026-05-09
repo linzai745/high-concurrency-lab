@@ -62,7 +62,7 @@ lab:
     
     stock-sync: 
       enabled: true
-      fixed-delay-ms: 1000
+      fixed-delay-ms: 10000
       gift-limit: 100
       batch-size: 500
       
@@ -70,6 +70,8 @@ lab:
       enabled: true
       fixed-delay-ms: 10000
       batch-size: 100
+      syncing-timeout-seconds: 60
+      created-timeout-seconds: 60
       
     stock-compensate: 
       enabled: true

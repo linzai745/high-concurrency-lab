@@ -18,7 +18,7 @@ public class GiftStockSyncJob {
     @Value("${lab.gift.stock-sync.gift-limit:100}")
     private int giftStockSyncGiftLimit;
     
-    @Scheduled(fixedDelayString = "${lab.gift.stock-sync.fixed-delay-ms:1000}")
+    @Scheduled(fixedDelayString = "${lab.gift.stock-sync.fixed-delay-ms:5000}")
     public void sync() {
         if (!giftStockSyncEnabled) {
             return;

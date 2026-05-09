@@ -52,7 +52,7 @@ public class GiftStockSyncCmdExe {
         }
 
         Integer totalCount = reservationGateway.sumReserveCountByBatchNo(batchNo);
-        Integer reservationCount = reservationGateway.countByBatchNo(batchNo);
+        Integer reservationCount = reservationGateway.countSyncingByBatchNo(batchNo);
         
         if (totalCount == null || totalCount <= 0 || reservationCount == null || reservationCount <= 0) {
             return;

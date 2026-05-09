@@ -9,6 +9,7 @@ import org.puti.gift.infra.dataobject.GiftStockSyncBatchDO;
 import org.puti.gift.infra.mapper.GiftStockSyncBatchMapper;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,14 @@ public class GiftStockSyncBatchGatewayImpl implements GiftStockSyncBatchGateway 
     public List<GiftStockSyncBatch> findNeedRecover(int limit) {
         List<GiftStockSyncBatchDO> giftStockSyncBatchList = giftStockSyncBatchMapper.selectNeedRecover(limit);
         return giftStockSyncBatchList.stream()
+                .map(GiftStockSyncBatchConvertor::toEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GiftStockSyncBatch> queryTimeoutCreatedBatches(LocalDateTime beforeTime, int batchSize) {
+        List<GiftStockSyncBatchDO> giftStockSyncBatches = giftStockSyncBatchMapper.selectTimeoutCreatedBatches(beforeTime, batchSize);
+        return giftStockSyncBatches.stream()
                 .map(GiftStockSyncBatchConvertor::toEntity)
                 .collect(Collectors.toList());
     }

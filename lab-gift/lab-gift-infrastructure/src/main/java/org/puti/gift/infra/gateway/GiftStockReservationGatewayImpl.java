@@ -84,8 +84,8 @@ public class GiftStockReservationGatewayImpl implements GiftStockReservationGate
     }
 
     @Override
-    public Integer countByBatchNo(String batchNo) {
-        return giftStockReservationMapper.countByBatchNo(batchNo);
+    public Integer countSyncingByBatchNo(String batchNo) {
+        return giftStockReservationMapper.countSyncingByBatchNo(batchNo);
     }
 
     @Override
@@ -111,5 +111,20 @@ public class GiftStockReservationGatewayImpl implements GiftStockReservationGate
     public Long sumReservedNotConfirmedCount(Long giftId) {
         Long value = giftStockReservationMapper.sumReservedNotConfirmedCount(giftId);
         return Optional.ofNullable(value).orElse(0L);
+    }
+
+    @Override
+    public List<String> queryTimeoutSyncingBatchNos(LocalDateTime beforeTime, int batchSize) {
+        return giftStockReservationMapper.selectTimeoutSyncingBatchNos(beforeTime, batchSize);
+    }
+
+    @Override
+    public int resetSyncingToPendingByBatchNo(String batchNo) {
+        return giftStockReservationMapper.resetSyncingToPendingByBatchNo(batchNo);
+    }
+
+    @Override
+    public int recoverSyncedByFinishedBatchNo(String batchNo) {
+        return giftStockReservationMapper.recoverSyncedByFinishedBatchNo(batchNo);
     }
 }
