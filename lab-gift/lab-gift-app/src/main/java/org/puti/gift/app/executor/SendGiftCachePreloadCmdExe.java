@@ -47,7 +47,7 @@ public class SendGiftCachePreloadCmdExe {
                 command.getGiftCount()
         );
         long totalAmount = gift.calculateAmount(command.getGiftCount());
-        String orderNo = sendGiftTransactionService.doSendInTransaction(command, totalAmount);
+        String orderNo = sendGiftTransactionService.doSendInTransaction(command, totalAmount, true);
         return SendGiftResponse.success(orderNo, false);
     }
 

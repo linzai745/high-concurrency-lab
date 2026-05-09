@@ -17,6 +17,12 @@ spring:
       connection-timeout: 10000
       max-lifetime: 1800000
       leak-detection-threshold: 5000
+  data:
+    redis:
+      host: 115.191.48.78
+      port: 6379
+      password: QsCD7caC2krGtq1Kn8LB
+      database: 0
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
@@ -33,8 +39,9 @@ management:
       show-details: always
 lab: 
   gift: 
-    # options: db-only, cache-preload
-    send-mode: cache-preload
+    # options: db-only, cache-preload, redis-stock
+    send-mode: redis-stock
+    
     cache: 
       gift: 
         maximum-size: 10000
@@ -42,3 +49,34 @@ lab:
       room: 
         maximum-size: 10000
         expire-after-write-seconds: 60
+    
+    redis-stock: 
+      key-prefix: "gift:stock:"
+      reservation-key-prefix: "gift:stock:reservation:"
+      reservation-ttl-seconds: 86400
+      reservation-expire-seconds: 60
+      init-on-startup: true
+      # 生产环境不给强制覆盖
+      force-init-on-startup: true
+      mysql-deduct-enabled: false
+    
+    stock-sync: 
+      enabled: true
+      fixed-delay-ms: 1000
+      gift-limit: 100
+      batch-size: 500
+      
+    stock-sync-recover: 
+      enabled: true
+      fixed-delay-ms: 10000
+      batch-size: 100
+      
+    stock-compensate: 
+      enabled: true
+      fixed-delay-ms: 5000
+      timeout-seconds: 60
+      batch-size: 100
+    
+    stock-check: 
+      enabled: true
+      fixed-delay-ms: 30000

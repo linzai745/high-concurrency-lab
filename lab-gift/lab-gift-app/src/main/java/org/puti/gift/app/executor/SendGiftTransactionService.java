@@ -7,6 +7,8 @@ import org.puti.gift.domain.account.model.AccountFlow;
 import org.puti.gift.domain.gift.gateway.GiftGateway;
 import org.puti.gift.domain.order.gateway.GiftOrderGateway;
 import org.puti.gift.domain.order.model.GiftOrder;
+import org.puti.gift.domain.stock.gateway.GiftStockReservationGateway;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,18 +24,25 @@ public class SendGiftTransactionService {
     private final AccountGateway accountGateway;
     private final GiftGateway giftGateway;
     private final GiftOrderGateway giftOrderGateway;
+    private final GiftStockReservationGateway giftStockReservationGateway;
     
     @Transactional(rollbackFor = Exception.class)
-    public String doSendInTransaction(SendGiftCommand command, Long totalAmount) {
+    public String doSendInTransaction(SendGiftCommand command, Long totalAmount, boolean deductMysqlStock) {
         String orderNo = generateOrderNo();
 
         boolean balanceDeducted = accountGateway.deductBalance(command.getUserId(), totalAmount);
         if (!balanceDeducted) {
             throw new RuntimeException("余额不足或账户不存在");
         }
-        boolean stockDeducted = giftGateway.deductStock(command.getGiftId(), command.getGiftCount());
-        if (!stockDeducted) {
-            throw new RuntimeException("库存不足或礼物不可用");
+        
+        if (deductMysqlStock) {
+            boolean stockDeducted = giftGateway.deductStock(
+                    command.getGiftId(), 
+                    command.getGiftCount()
+            );
+            if (!stockDeducted) {
+                throw new RuntimeException("库存不足或礼物不可用");
+            }
         }
 
         GiftOrder order = GiftOrder.create(
@@ -47,7 +56,6 @@ public class SendGiftTransactionService {
                 totalAmount
         );
         giftOrderGateway.save(order);
-        
         AccountFlow flow = AccountFlow.deduct(
                 generateFlowNo(),
                 command.getUserId(),
@@ -55,6 +63,16 @@ public class SendGiftTransactionService {
                 totalAmount
         );
         accountGateway.saveAccountFlow(flow);
+        
+        if (!deductMysqlStock) {
+            boolean confirmed = giftStockReservationGateway.confirm(
+                    command.getRequestId(),
+                    orderNo
+            );
+            if (!confirmed) {
+                throw new RuntimeException("库存预占单确认失败");
+            }
+        }
         return orderNo;
     }
 
