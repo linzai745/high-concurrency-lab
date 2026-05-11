@@ -6,7 +6,7 @@ import org.puti.gift.infra.properties.GiftStockSyncRecoverProperties;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class GiftStockSyncRecoverJob {
     

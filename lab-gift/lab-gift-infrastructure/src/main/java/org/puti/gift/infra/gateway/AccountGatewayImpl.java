@@ -33,6 +33,19 @@ public class AccountGatewayImpl implements AccountGateway {
     }
 
     @Override
+    public Long selectBalanceForUpdate(Long userId) {
+        return userAccountMapper.selectBalanceForUpdate(userId);
+    }
+
+    @Override
+    public void deductBalanceLocked(Long userId, Long amount) {
+        int affectedRows = userAccountMapper.deductBalanceLocked(userId, amount);
+        if (affectedRows <= 0) {
+            throw new IllegalStateException("账户锁定扣减失败, userId=" + userId);
+        }
+    }
+
+    @Override
     public void saveAccountFlow(AccountFlow accountFlow) {
         accountFlowMapper.insert(AccountInfraConvertor.toDO(accountFlow));
     }
