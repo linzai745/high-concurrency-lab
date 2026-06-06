@@ -1,5 +1,9 @@
 server:
   port: 8081
+  tomcat:
+    # 开启后 Micrometer 才会暴露 tomcat_threads_* 等线程池指标
+    mbeanregistry:
+      enabled: true
 
 spring:
   application:
@@ -7,7 +11,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
 #    url: jdbc:mysql://115.191.48.78:3306/gift_lab?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    url: jdbc:mysql://localhost:3306/gift_lab?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/gift_lab?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: hmcbCpHF1QR0agihcp7Qw
     
@@ -29,7 +33,7 @@ mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     
 management:
   endpoints:
@@ -39,8 +43,23 @@ management:
   endpoint:
     health:
       show-details: always
-lab: 
-  gift: 
+  metrics:
+    tags:
+      application: lab-gift
+lab:
+  monitor:
+    push-gateway:
+      enabled: true
+      base-url: ""
+      job: lab-gift
+      # instance 为空时默认取主机名；多压测节点时可分别设置
+      instance: demo
+      push-interval-ms: 15000
+      # Aliyun 托管 Prometheus 如需鉴权，在此填写（二选一）：
+      # authorization: "Bearer <token>"
+      username: 
+      password: 
+  gift:
     # options: db-only, cache-preload, redis-stock
     send-mode: redis-stock
     

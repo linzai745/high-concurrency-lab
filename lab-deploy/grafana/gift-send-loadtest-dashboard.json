@@ -1,0 +1,824 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "选择 lab-gift 指标所在的 Prometheus 数据源",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["gift", "loadtest", "lab-gift"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "数据源",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(gift_send_seconds_count, application)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "应用",
+        "multi": false,
+        "name": "application",
+        "options": [],
+        "query": { "query": "label_values(gift_send_seconds_count, application)", "refId": "app" },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(gift_send_seconds_count{application=\"$application\"}, mode)",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".*",
+        "label": "模式",
+        "multi": true,
+        "name": "mode",
+        "options": [],
+        "query": { "query": "label_values(gift_send_seconds_count{application=\"$application\"}, mode)", "refId": "mode" },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(gift_send_seconds_count{application=\"$application\"}, instance)",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".*",
+        "label": "实例",
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": { "query": "label_values(gift_send_seconds_count{application=\"$application\"}, instance)", "refId": "inst" },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": { "selected": true, "text": "1m", "value": "1m" },
+        "hide": 0,
+        "label": "速率窗口",
+        "name": "rate_window",
+        "options": [
+          { "selected": false, "text": "30s", "value": "30s" },
+          { "selected": true, "text": "1m", "value": "1m" },
+          { "selected": false, "text": "2m", "value": "2m" },
+          { "selected": false, "text": "5m", "value": "5m" }
+        ],
+        "query": "30s,1m,2m,5m",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Gift Send 压测监控 (lab-gift)",
+  "uid": "gift-send-loadtest",
+  "version": 1,
+  "weekStart": "",
+  "panels": [
+    {
+      "type": "row",
+      "title": "概览",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "总 QPS",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "decimals": 1, "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "QPS", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "成功 QPS",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 2,
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "decimals": 1, "color": { "mode": "fixed", "fixedColor": "green" } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\", result=\"success\"}[$rate_window]))",
+          "legendFormat": "成功", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "错误率",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "id": 3,
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.01 },
+            { "color": "red", "value": 0.05 }
+          ] } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\", result=\"failure\"}[$rate_window])) / clamp_min(sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "错误率", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P99 延迟",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "id": 4,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.2 },
+            { "color": "red", "value": 0.5 }
+          ] } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p99", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P95 延迟",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 5,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "fixed", "fixedColor": "blue" } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p95", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "累计请求数",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "id": 6,
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "purple" } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"})",
+          "legendFormat": "总数", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "吞吐量",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "QPS（按模式）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "id": 7,
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (mode) (rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{mode}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "成功 vs 失败 QPS",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "id": 8,
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2, "showPoints": "never", "stacking": { "mode": "normal" } } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "success" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
+          { "matcher": { "id": "byName", "options": "failure" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (result) (rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{result}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "延迟",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 102,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "延迟百分位 (p50/p95/p99)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "id": 9,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p50", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p95", "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p99", "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "P99 延迟（按模式）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "id": 10,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum by (le, mode) (rate(gift_send_seconds_bucket{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "{{mode}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "平均延迟（sum/count）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+      "id": 11,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (mode) (rate(gift_send_seconds_sum{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])) / clamp_min(sum by (mode) (rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "{{mode}} avg", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "最大延迟 (max)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+      "id": 12,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "max by (mode) (gift_send_seconds_max{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"})",
+          "legendFormat": "{{mode}} max", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "错误与幂等",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+      "id": 103,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "错误率（按模式）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "id": 13,
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (mode) (rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\", result=\"failure\"}[$rate_window])) / clamp_min(sum by (mode) (rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "{{mode}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "幂等命中占比",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "id": 14,
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\", idempotent=\"true\"}[$rate_window])) / clamp_min(sum(rate(gift_send_seconds_count{application=\"$application\", mode=~\"$mode\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "幂等命中率", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "JVM GC",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 40 },
+      "id": 104,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "GC 暂停时间占比 (STW)",
+      "description": "每秒花在 GC 暂停上的时间占比，越高说明 GC 压力越大",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 41 },
+      "id": 20,
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 3, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (action) (rate(jvm_gc_pause_seconds_sum{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{action}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC 频率 (次/s)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 41 },
+      "id": 21,
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 2, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (cause, action) (rate(jvm_gc_pause_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{action}} / {{cause}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC 平均暂停时长",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 49 },
+      "id": 22,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 4, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (action) (rate(jvm_gc_pause_seconds_sum{application=\"$application\", instance=~\"$instance\"}[$rate_window])) / clamp_min(sum by (action) (rate(jvm_gc_pause_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "{{action}} avg", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "max by (action) (jvm_gc_pause_seconds_max{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{action}} max", "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "堆内存 used / 分配速率",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 49 },
+      "id": 23,
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "分配速率" }, "properties": [ { "id": "unit", "value": "Bps" }, { "id": "custom.axisPlacement", "value": "right" } ] },
+          { "matcher": { "id": "byName", "options": "heap max" }, "properties": [ { "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (jvm_memory_used_bytes{application=\"$application\", instance=~\"$instance\", area=\"heap\"})",
+          "legendFormat": "{{instance}} heap used", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (jvm_memory_max_bytes{application=\"$application\", instance=~\"$instance\", area=\"heap\"})",
+          "legendFormat": "heap max", "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "分配速率", "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Tomcat 线程池",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 57 },
+      "id": 105,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Tomcat 线程数 (busy / current / max)",
+      "description": "需开启 server.tomcat.mbeanregistry.enabled=true 才会有该指标",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 58 },
+      "id": 24,
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": ".*max.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }, { "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } } ] },
+          { "matcher": { "id": "byRegexp", "options": ".*busy.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (tomcat_threads_busy_threads{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}} busy", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (tomcat_threads_current_threads{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}} current", "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (tomcat_threads_config_max_threads{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}} max", "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tomcat 线程池使用率 (busy / max)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 58 },
+      "id": 25,
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "max": 1, "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2, "showPoints": "never" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.7 },
+            { "color": "red", "value": 0.9 }
+          ] } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (tomcat_threads_busy_threads{application=\"$application\", instance=~\"$instance\"}) / clamp_min(sum by (instance) (tomcat_threads_config_max_threads{application=\"$application\", instance=~\"$instance\"}), 1)",
+          "legendFormat": "{{instance}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "数据库连接池 (HikariCP)",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 66 },
+      "id": 106,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "连接数 (active / idle / total / max)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 67 },
+      "id": 30,
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": ".*active.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] },
+          { "matcher": { "id": "byRegexp", "options": ".*max.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }, { "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineStyle", "value": { "dash": [10, 10], "fill": "dash" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (hikaricp_connections_active{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}}/{{pool}} active", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (hikaricp_connections_idle{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}}/{{pool}} idle", "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (hikaricp_connections{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}}/{{pool}} total", "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (hikaricp_connections_max{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}}/{{pool}} max", "refId": "D"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "等待连接的线程数 (pending)",
+      "description": "> 0 表示连接池已打满、请求在排队，是压测下 DB 瓶颈的最直接信号",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 67 },
+      "id": 31,
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2, "showPoints": "never" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (hikaricp_connections_pending{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}}/{{pool}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "获取连接耗时 (avg / max)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 75 },
+      "id": 32,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 4, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance) (rate(hikaricp_connections_acquire_seconds_sum{application=\"$application\", instance=~\"$instance\"}[$rate_window])) / clamp_min(sum by (instance) (rate(hikaricp_connections_acquire_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "{{instance}} avg", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "max by (instance) (hikaricp_connections_acquire_seconds_max{application=\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "{{instance}} max", "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "连接获取超时 (timeout/s)",
+      "description": "hikaricp_connections_timeout_total 速率，非 0 说明有请求拿不到连接被超时拒绝",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 75 },
+      "id": 33,
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 2, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2, "showPoints": "never" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 0.001 } ] } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (instance, pool) (rate(hikaricp_connections_timeout_total{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{instance}}/{{pool}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Redis (Lettuce 命令)",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 83 },
+      "id": 107,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 命令 QPS（按命令）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 84 },
+      "id": 34,
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum by (command) (rate(lettuce_command_completion_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "{{command}}", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 命令延迟 p99（按命令）",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 84 },
+      "id": 35,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 4, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum by (le, command) (rate(lettuce_command_completion_seconds_bucket{application=\"$application\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "{{command}} p99", "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 总 QPS / 平均延迟",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 92 },
+      "id": 36,
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "平均延迟" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "custom.axisPlacement", "value": "right" }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(lettuce_command_completion_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window]))",
+          "legendFormat": "总 QPS", "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(lettuce_command_completion_seconds_sum{application=\"$application\", instance=~\"$instance\"}[$rate_window])) / clamp_min(sum(rate(lettuce_command_completion_seconds_count{application=\"$application\", instance=~\"$instance\"}[$rate_window])), 1e-9)",
+          "legendFormat": "平均延迟", "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 首字节响应延迟 p99 (firstresponse)",
+      "description": "命令发出到收到首字节的时间，主要反映网络/服务端排队",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 92 },
+      "id": 37,
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 4, "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never" } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(lettuce_command_firstresponse_seconds_bucket{application=\"$application\", instance=~\"$instance\"}[$rate_window])))",
+          "legendFormat": "p99", "refId": "A"
+        }
+      ]
+    }
+  ]
+}
